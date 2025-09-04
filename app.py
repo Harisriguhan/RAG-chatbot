@@ -12,6 +12,7 @@ import uuid
 from datetime import datetime
 import tempfile
 import nltk
+import ollama
 nltk.download('punkt')
 
 # Try to import Pinecone
@@ -89,13 +90,6 @@ def init_pinecone():
         st.sidebar.error(f"Error initializing Pinecone: {str(e)}")
         return False
 
-# Check if Ollama is running
-def check_ollama():
-    try:
-        response = requests.get("http://localhost:11434/api/tags", timeout=5)
-        return response.status_code == 200
-    except:
-        return False
 
 # Load embedding model
 @st.cache_resource
@@ -177,11 +171,7 @@ def retrieve_chunks_pinecone(query, model, top_k=3):
     except Exception as e:
         return [f"Error querying Pinecone: {str(e)}"]
 
-# Generate response with Ollama
 def generate_response(query, context_chunks):
-    if not check_ollama():
-        return "Ollama is not running. Please start Ollama with 'ollama serve'"
-    
     # Filter out error messages from context chunks
     valid_chunks = [chunk for chunk in context_chunks if not chunk.startswith("Error") and not chunk.startswith("Pinecone")]
     
@@ -197,18 +187,15 @@ Answer this question: {query}
 If the context doesn't contain the answer, say you don't know."""
 
     try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": "llama3",
-                "prompt": prompt,
-                "stream": False,
-                "options": {"temperature": 0.3}
-            }
+        response = ollama.chat(
+            model="llama3",
+            messages=[{"role": "user", "content": prompt}],
+            options={"temperature": 0.3}
         )
-        return response.json().get("response", "No response generated")
+        return response["message"]["content"]
     except Exception as e:
         return f"Error: {str(e)}"
+
 
 # Fetch content from web URL
 def fetch_web_content(url):
