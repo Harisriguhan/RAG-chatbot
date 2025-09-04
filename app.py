@@ -243,8 +243,10 @@ def fetch_wikipedia_content(topic):
         # Alternative approach using wikipedia-api
         try:
             import wikipediaapi
+
             wiki_wiki = wikipediaapi.Wikipedia(
-                user_agent='RAG-Bot/1.0 (your-email@example.com)'
+                language='en',
+                headers={'User-Agent': 'RAG-Bot/1.0 (your-email@example.com)'}
             )
             
             page = wiki_wiki.page(cleaned_topic)
@@ -252,6 +254,7 @@ def fetch_wikipedia_content(topic):
                 return page.text
             else:
                 return f"Wikipedia page '{cleaned_topic}' does not exist. Try a different topic."
+            
                 
         except ImportError:
             # Fallback to requests-based approach
