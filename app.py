@@ -12,8 +12,16 @@ import uuid
 from datetime import datetime
 import tempfile
 import nltk
-import ollama
 nltk.download('punkt')
+from openai import AzureOpenAI
+import os
+
+client = AzureOpenAI(
+    api_key=st.secrets.get("AZURE_OPENAI_KEY", os.environ.get("AZURE_OPENAI_KEY")),
+    api_version="2025-01-01-preview",
+    azure_endpoint=st.secrets.get("AZURE_OPENAI_ENDPOINT", os.environ.get("AZURE_OPENAI_ENDPOINT"))
+)
+
 
 # Try to import Pinecone
 try:
@@ -172,8 +180,10 @@ def retrieve_chunks_pinecone(query, model, top_k=3):
         return [f"Error querying Pinecone: {str(e)}"]
 
 def generate_response(query, context_chunks):
-    # Filter out error messages from context chunks
-    valid_chunks = [chunk for chunk in context_chunks if not chunk.startswith("Error") and not chunk.startswith("Pinecone")]
+    valid_chunks = [
+        chunk for chunk in context_chunks
+        if not chunk.startswith(("Error", "Pinecone"))
+    ]
     
     if not valid_chunks:
         return "I don't have enough information to answer this question. Please add some content to the knowledge base first."
@@ -185,16 +195,17 @@ def generate_response(query, context_chunks):
 Answer this question: {query}
 
 If the context doesn't contain the answer, say you don't know."""
-
+    
     try:
-        response = ollama.chat(
-            model="llama3",
+        response = client.chat.completions.create(
+            model="gpt-4o",   # 👈 replace with your Azure deployment name
             messages=[{"role": "user", "content": prompt}],
-            options={"temperature": 0.3}
+            temperature=0.3
         )
-        return response["message"]["content"]
+        return response.choices[0].message.content
     except Exception as e:
         return f"Error: {str(e)}"
+
 
 
 # Fetch content from web URL
