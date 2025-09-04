@@ -9,3 +9,4 @@ llama-index-readers-wikipedia==0.1.2
 llama-index-readers-youtube-transcript==0.1.2
 wikipedia-api==0.5.8
 huggingface_hub==0.25.2
+wikipedia
