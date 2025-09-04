@@ -1,0 +1,10 @@
+streamlit==1.28.0
+sentence-transformers==2.2.2
+numpy==1.24.0
+requests==2.31.0
+pinecone-client==3.0.0
+llama-index==0.10.0
+llama-index-readers-web==0.1.2
+llama-index-readers-wikipedia==0.1.2
+llama-index-readers-youtube-transcript==0.1.2
+wikipedia-api==0.5.8
