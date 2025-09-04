@@ -11,6 +11,8 @@ import os
 import uuid
 from datetime import datetime
 import tempfile
+import nltk
+nltk.download('punkt')
 
 # Try to import Pinecone
 try:
